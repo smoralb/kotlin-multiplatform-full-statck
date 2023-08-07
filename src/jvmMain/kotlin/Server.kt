@@ -18,7 +18,7 @@ val shoppingList = mutableListOf(
     ShoppingListItem("Orange Juice 🍊", 3)
 )
 fun main() {
-    embeddedServer(factory = Netty, port = 9090) {
+    embeddedServer(factory = Netty, port = 8080) {
         //Automatic serialization and deserialization content in json
         install(ContentNegotiation) {
             json()
@@ -39,7 +39,7 @@ fun main() {
                     ContentType.Text.Html
                 )
             }
-            staticResources("/", "resources")
+            staticResources("/", "")
             route(ShoppingListItem.path) {
                 get {
                     call.respond(shoppingList)
