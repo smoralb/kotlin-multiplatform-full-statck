@@ -1,3 +1,4 @@
+import Database.collection
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -10,13 +11,9 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.routing.post
+import org.litote.kmongo.eq
 
-val shoppingList = mutableListOf(
-    ShoppingListItem("Cucumbers 🥒", 1),
-    ShoppingListItem("Tomatoes 🍅", 2),
-    ShoppingListItem("Orange Juice 🍊", 3)
-)
+
 fun main() {
     embeddedServer(factory = Netty, port = 8080) {
         //Automatic serialization and deserialization content in json
@@ -42,15 +39,15 @@ fun main() {
             staticResources("/", "")
             route(ShoppingListItem.path) {
                 get {
-                    call.respond(shoppingList)
+                    call.respond(collection.find().toList())
                 }
                 post {
-                    shoppingList += call.receive<ShoppingListItem>()
+                    collection.insertOne(call.receive<ShoppingListItem>())
                     call.respond(HttpStatusCode.OK)
                 }
                 delete("/{id}") {
                     val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
-                    shoppingList.removeIf { it.id == id }
+                    collection.deleteOne(ShoppingListItem::id eq id)
                     call.respond(HttpStatusCode.OK)
                 }
             }
